@@ -202,3 +202,13 @@ pub fn plot_degree_centrality(degree_centrality: &[(String, usize)]) -> Result<(
 
     Ok(())
 }
+
+
+
+
+//println!("Clustering states...");
+    //let clusters = cluster_states(&similarity_graph);
+    //println!("Identified clusters:");
+   // for (i, cluster) in clusters.iter().enumerate() {
+   // println!("Cluster {}: {:?}", i + 1, cluster);
+//}

@@ -13,6 +13,7 @@ use std::collections::HashMap;
 
 
 pub fn construct_graph(records: &[CleanRecord]) -> Graph<String, f32> {
+    
     let mut graph = Graph::<String, f32>::new();
     let mut state_indices = std::collections::HashMap::new();
 
