@@ -9,10 +9,10 @@ pub mod state_comparison;
 // Re-export commonly used items for easier access in main.rs
 pub use data_processing::{process_dataset, filter_by_state, identify_outliers,CleanRecord};
 pub use graph_analysis::{construct_graph, compute_degree_centrality, compute_average_shortest_path, compute_k_core, group_states_by_centrality};
-pub use calculations::linear_regression;
+pub use calculations::{linear_regression, perform_t_test};
 pub use visualization::{plot_rates, plot_degree_centrality, plot_trends_over_time, plot_national_averages, plot_crime_rates_comparison};
 pub use nonlinear::nonlinear_regression;
-pub use petgraph_vis::{construct_similarity_graph, cluster_states, plot_graph_with_clusters, export_graph, visualize_similarity_graph, export_graph_to_png};
+pub use petgraph_vis::{construct_similarity_graph, export_graph, visualize_similarity_graph};
 pub use state_comparison::compare_states;
 // Optionally, add a shared run function for testing or execution
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {

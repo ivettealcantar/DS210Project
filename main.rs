@@ -2,10 +2,10 @@ use mass_incarceration_analysis::{
     process_dataset, filter_by_state, construct_graph, compute_degree_centrality,
     compute_average_shortest_path, compute_k_core, group_states_by_centrality,
     linear_regression, plot_rates, plot_degree_centrality, plot_trends_over_time,
-    plot_national_averages, nonlinear_regression, export_graph, identify_outliers, construct_similarity_graph, compare_states, plot_crime_rates_comparison,cluster_states,visualize_similarity_graph,plot_graph_with_clusters, export_graph_to_png,
-    
+    plot_national_averages, nonlinear_regression, export_graph, identify_outliers, compare_states,
+    plot_crime_rates_comparison, perform_t_test,
 };
-use petgraph::graph::UnGraph;
+
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _start = std::time::Instant::now();
 
@@ -14,8 +14,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         eprintln!("Dataset file not found. Please ensure the file is present.");
         return Ok(());
     }
-
-    
 
     // Step 1: Process the dataset
     println!("Processing dataset...");
@@ -34,9 +32,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         eprintln!("No valid records found. Exiting.");
         return Ok(());
     }
+
     // Step 2: Perform linear regression
     println!("Performing linear regression...");
-
     linear_regression(&records)?;
 
     // Step 3: Plot average rates
@@ -47,13 +45,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Performing nonlinear regression...");
     nonlinear_regression(&records)?;
 
-    // Step 5: Filter data for specific states
+    // Step 5: Filter data for specific states and plot trends
     for state in &["Arizona", "Massachusetts"] {
         let state_data = filter_by_state(&records, state);
         if state_data.is_empty() {
             eprintln!("No data found for {}.", state);
         } else {
-            
             plot_trends_over_time(&records, Some(state))?;
         }
     }
@@ -92,34 +89,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Medium Centrality States: {:?}", medium);
     println!("Low Centrality States: {:?}", low);
 
-    // Step 10: Nationwide trends
+    // Step 10: Plot nationwide trends and identify outliers
     println!("Plotting nationwide trends...");
     plot_national_averages(&records)?;
-    
-    let outliers= identify_outliers(&records);
-    println!("outliers:{:?}",outliers);
-    println!("Constructing similarity graph...");
-    
-    println!("Constructing similarity graph...");
-    let similarity_graph: UnGraph<String, f32> = construct_similarity_graph(&records);
-    println!("Similarity graph created with {} nodes.", similarity_graph.node_count());
 
-    // Step 3: Visualize the similarity graph
-    visualize_similarity_graph(&similarity_graph, "similarity_graph.dot")?;
+    let outliers = identify_outliers(&records);
+    println!("Outliers: {:?}", outliers);
 
-    // Step 4: Cluster states
-    let clusters = cluster_states(&similarity_graph);
-    
-
-    // Step 5: Plot graph with clusters
-    plot_graph_with_clusters(&similarity_graph, &clusters, "clustered_graph.dot")?;
-
+    // Step 11: Compare Arizona and Massachusetts crime rates
     let (arizona_data, massachusetts_data) = compare_states(&records, "Arizona", "Massachusetts");
     println!("Arizona Data: {:?}", arizona_data);
     println!("Massachusetts Data: {:?}", massachusetts_data);
+
     plot_crime_rates_comparison(&records, &["Arizona", "Massachusetts"])?;
 
-    export_graph_to_png("clustered_graph.dot", "clustered_graph.png")?;
-    
+    // Step 12: Perform t-test
+    let crime_rates_az: Vec<f64> = arizona_data.iter().map(|r| r.crime_rate as f64).collect();
+    let crime_rates_ma: Vec<f64> = massachusetts_data.iter().map(|r| r.crime_rate as f64).collect();
+
+    let (t_stat, p_value) = perform_t_test(&crime_rates_az, &crime_rates_ma)?;
+    println!(
+        "T-Test Results: t-statistic = {:.4}, p-value = {:.4}",
+        t_stat, p_value
+    );
+
     Ok(())
 }
